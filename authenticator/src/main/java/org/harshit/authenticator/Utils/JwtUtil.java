@@ -61,23 +61,25 @@ public class JwtUtil {
      */
     public String GenerateToken(String username) throws Exception {
         // Get RSA private key and public key
-        RSAPrivateKey private_key = (RSAPrivateKey) loadPrivateKey("private_key.pem");
-        RSAPublicKey pubic_key = (RSAPublicKey) loadPublicKey("public_key.pem");
+        System.out.println("Generating the token");
+        RSAPrivateKey private_key = (RSAPrivateKey) loadPrivateKey("authenticator/private_key.pem");
+        RSAPublicKey public_key = (RSAPublicKey) loadPublicKey("authenticator/public_key.pem");
 
-        Algorithm algorithm = Algorithm.RSA256(pubic_key, private_key);
+        Algorithm algorithm = Algorithm.RSA256(public_key, private_key);
 
         String token = JWT.create()
             .withSubject(username)
             .withIssuer("harshit")
             .sign(algorithm); 
 
+        System.out.println("Generated the token");
         return token;
     }
 
     public Boolean VerifyToken(String token) {
         try {
-            RSAPrivateKey private_key = (RSAPrivateKey) loadPrivateKey("/Users/harshitgarg/JAVA-projects/authenticator/private_key.pem");
-            RSAPublicKey pubic_key = (RSAPublicKey) loadPublicKey("/Users/harshitgarg/JAVA-projects/authenticator/public_key.pem");
+            RSAPrivateKey private_key = (RSAPrivateKey) loadPrivateKey("authenticator/private_key.pem");
+            RSAPublicKey pubic_key = (RSAPublicKey) loadPublicKey("authenticator/public_key.pem");
 
             Algorithm algorithm = Algorithm.RSA256(pubic_key, private_key);
 

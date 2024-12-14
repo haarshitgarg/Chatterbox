@@ -33,6 +33,14 @@ import reactor.core.publisher.Mono;
  */
 public class AuthenticationFilter implements GatewayFilter {
 
+    /**
+     * Custom filter to authenticate any incoming request to the gateway
+     *
+     * @param exchange The current web exchange (request and response) for this HTTP request. 
+     * @param chain The filter chain that allows forwarding the request to the next filter.
+     *
+     * @return A Mono representing the asynchronous completion of the request filtering.
+     */
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         System.out.println("[FILTER] Authentication filter invoked");
         HttpHeaders header = exchange.getRequest().getHeaders();
@@ -48,10 +56,16 @@ public class AuthenticationFilter implements GatewayFilter {
         return chain.filter(exchange);
     }
 
+    /**
+     * validates the jwt Token
+     *
+     * @param token It is the jwt token that needs to be verified
+     * @return Boolean value based on if the token is correct
+     */
     private Boolean validate(String token) {
         // Logic to handle validation
         System.out.println("[FILTER] Validating...");
-        String publicKeyPath = "public_key.pem";
+        String publicKeyPath = "apigateway/public_key.pem";
         try {
             RSAPublicKey public_key= (RSAPublicKey) loadPublicKey(publicKeyPath);
             Algorithm algorithm = Algorithm.RSA256(public_key, null);
@@ -68,6 +82,13 @@ public class AuthenticationFilter implements GatewayFilter {
         }
     }
 
+    /**
+     * Loads the public key from the given path
+     *
+     * @param publicKeyPath Path to the public key
+     *
+     * @return Returns the public key
+     */
     private static PublicKey loadPublicKey(String publicKeyPath) throws Exception {
         String publicKeyPEM = new String(Files.readAllBytes(Paths.get(publicKeyPath)))
                 .replace("-----BEGIN PUBLIC KEY-----", "")

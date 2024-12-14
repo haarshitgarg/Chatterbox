@@ -7,13 +7,31 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * Api gateway application acts as a single point of entry to various services
+ */
 @SpringBootApplication
 public class ApigatewayApplication {
 
+    /**
+     * Main function to run the application
+     */
 	public static void main(String[] args) {
 		SpringApplication.run(ApigatewayApplication.class, args);
 	}
 
+    /**
+     * Handles the all the routes
+     *
+     * "/home -> /home"
+     * "/about -> /about"
+     * "/auth -> authenticator enpoint localhost:8083/auth"
+     * "/chat -> userinfo endpoint localhost:8090/chat
+     *
+     * @param builder To define and build routes 
+     *
+     * @return A collection of routes
+     */
     @Bean
     RouteLocator getRoutes(RouteLocatorBuilder builder) {
 		return builder.routes()
@@ -24,7 +42,7 @@ public class ApigatewayApplication {
 					.setName("Circuit breaker")
 					.setFallbackUri("forward:/fallback"))
 				)
-				.uri("http://localhost:8081/home")
+				.uri("http://localhost:8082/home")
 			)
 			.route(p->p
 				.path("/about")
@@ -32,7 +50,7 @@ public class ApigatewayApplication {
 					.circuitBreaker(config -> config
 					.setName("break")
 					.setFallbackUri("forward:/fallback")))
-				.uri("http://localhost:8081/about")
+				.uri("http://localhost:8082/about")
 			)
 			.route(p->p
 				.path("/auth")
