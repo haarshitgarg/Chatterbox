@@ -1,0 +1,6 @@
+org/harshit/userinfo/Controller/GetResponse.class
+org/harshit/userinfo/Controller/DatabaseController.class
+org/harshit/userinfo/Controller/ApplicationController.class
+org/harshit/userinfo/Controller/ContactInformation.class
+org/harshit/userinfo/Utils/Friend.class
+org/harshit/userinfo/UserinfoApplication.class
