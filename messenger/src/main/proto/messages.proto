@@ -2,23 +2,33 @@ syntax = "proto3";
 
 package org.harshit.messenger.chat;
 
+// The message that actually goes to and fro between users
 message ChatMessage {
-  string user = 1;
-  string friend = 2;
-  string message = 3;
-  int64 timestamp = 4;
+  string user = 1;  // User sending the message
+  string friend = 2; // User this message is intended for
+  string message = 3; // The actual text message
+  int64 timestamp = 4; // The timestamp this message was sent at
 }
 
+// Response message from the server.
 message ChatMessageResponse {
     bool deliveryStatus = 1;
 }
 
+// Online status of the user
 message OnlineStatus {
     bool online = 1;
 }
 
+// Service that handles sending messages to other users
 service ChatService {
-  rpc SendMessage (ChatMessage) returns (ChatMessageResponse);
-  rpc StreamMessage (stream ChatMessage) returns (ChatMessageResponse);
-  rpc SendMessagesGRPC (stream ChatMessage) returns (stream ChatMessage);
+
+    // Sends message to the server
+    rpc SendMessage (ChatMessage) returns (ChatMessageResponse);
+
+    // Stream messages to the server. The server responds at the end of the stream
+    rpc StreamMessage (stream ChatMessage) returns (ChatMessageResponse);
+
+    // Stream messages to the server which server then forwards to the intended user
+    rpc SendMessagesGRPC (stream ChatMessage) returns (stream ChatMessage);
 }
