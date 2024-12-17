@@ -4,11 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.harshit.messenger.chat.ChatServiceGrpc.ChatServiceImplBase;
 import org.harshit.messenger.chat.Messages.ChatMessage;
 import org.harshit.messenger.chat.Messages.ChatMessageResponse;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 public class MessagingService extends ChatServiceImplBase{
@@ -50,6 +53,7 @@ public class MessagingService extends ChatServiceImplBase{
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
             }
+
         };
     }
 
@@ -86,7 +90,21 @@ public class MessagingService extends ChatServiceImplBase{
             @Override
             public void onError(Throwable t) {
                 logger.log(Level.WARNING, "Found error");
+                if(t instanceof StatusRuntimeException) {
+                    StatusRuntimeException ex = (StatusRuntimeException) t;
+                    if(ex.getStatus().getCode() == Status.Code.CANCELLED) {
+                        logger.log(Level.INFO, "Client is cancelled");
+                        // Need to remove the client from the usermap and watever else is required
+                        userMap = userMap.entrySet()
+                            .stream()
+                            .filter(entry -> !entry.getValue().equals(responseObserver))
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                        printUserMap();
+                    }
+                }
             }
+
 
             @Override
             public void onCompleted() {
