@@ -8,9 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import org.harshit.userinfo.Utils.Friend;
+import org.harshit.userinfo.Utils.Messages;
 
 @Controller
 public class ApplicationController {
@@ -18,7 +21,7 @@ public class ApplicationController {
     @GetMapping("/chat")
     public ResponseEntity<GetResponse> getContactList(@RequestParam String userid) {
         System.out.println("[CONTROLLER] Called Get Contact List api with userid: "+userid);
-        DatabaseController db_controller = new DatabaseController();
+        DatabaseController db_controller = DatabaseController.instance;
         try {
             List<Friend> records = db_controller.getFriendsList(userid);
             GetResponse response = new GetResponse();
@@ -30,6 +33,18 @@ public class ApplicationController {
             System.out.println("[CONTROLLER] Failed to get the contact list");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/postMessage")
+    public ResponseEntity<Boolean> postMessages(@RequestBody Messages message) {
+        DatabaseController controller = DatabaseController.instance;
+        if(controller.addMessageToDB(message)) {
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(false, HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
     }
 
 }
