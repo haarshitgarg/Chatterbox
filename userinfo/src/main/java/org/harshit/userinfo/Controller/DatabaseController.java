@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.harshit.userinfo.Utils.Friend;
+import org.harshit.userinfo.Utils.Messages;
 
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
@@ -44,6 +45,18 @@ public class DatabaseController {
 
         System.out.println("[DATABASE] Ran the db query");
         return friend_list;
+    }
+
+    public Boolean deleteAllMessages() {
+        // TODO: super user access to delete all the messages. Will be usefull for testing etc.
+        
+        return true;
+    }
+
+    public Boolean addMessageToDB(Messages message) {
+        // TODO: Code to add messages to the DB
+
+        return true;
     }
 
 }
