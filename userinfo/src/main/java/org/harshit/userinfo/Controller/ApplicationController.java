@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.mysql.cj.jdbc.DatabaseMetaData;
+
+import org.bouncycastle.util.test.FixedSecureRandom.Data;
 import org.harshit.userinfo.Utils.Friend;
 import org.harshit.userinfo.Utils.Messages;
 
@@ -47,6 +50,29 @@ public class ApplicationController {
 
     }
 
+    /**
+     * Sync Endpoint: To synchronize the application with the latest Messages
+     *
+     * @param username Name of the user requesting to sync
+     * @param lastSync Last time the application was synced. Newest message that the user have
+     *
+     * @return Returns the Response entity with a list of all the messages.
+     */
+    @GetMapping("/syncChat")
+    public ResponseEntity<List<Messages>> syncChat(@RequestParam String username, @RequestParam long lastSync) {
+        System.out.println("[CONTROLLER] Synching chat...");
+        DatabaseController controller = DatabaseController.instance;
+        try {
+            System.out.println("[CONTROLLER] Finding the list of messages");
+            List<Messages> new_messages = controller.getMessages(username, lastSync);
+
+            return new ResponseEntity<>(new_messages, HttpStatus.OK);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
 }
 
 class GetResponse {

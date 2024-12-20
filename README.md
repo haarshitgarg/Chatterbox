@@ -31,6 +31,7 @@ It offers the following enpoints:
 | /fallback | GET REQUEST | String | The standard fallback page for every request |
 | /auth | POST REQUEST | AuthResponse | apigateway routes the request to authenticator |
 | /chat | GET REQUEST | GetResponse | apigateway routes the request to userinfo service |
+| /syncChat | GET REQUEST | List of Messages | apigateway routes the request to userinfo to look for all the messages for a particular user from DB |
 
 messenger service offers the following service
 

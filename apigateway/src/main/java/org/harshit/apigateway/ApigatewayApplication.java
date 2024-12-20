@@ -69,6 +69,15 @@ public class ApigatewayApplication {
 					.setFallbackUri("forward:/fallback")))
 				.uri("http://localhost:8090/chat")
 			)
+			.route(p->p
+				.path("/syncChat**")
+				.filters(f -> f
+					.filter(new AuthenticationFilter())
+					.circuitBreaker(config -> config
+					.setName("break")
+					.setFallbackUri("forward:/fallback")))
+				.uri("http://localhost:8090/syncChat")
+			)
 			.build();
 	}
 
