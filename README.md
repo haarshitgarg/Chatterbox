@@ -15,7 +15,10 @@ Finally the core functionality is Handled by `messenger` service. It is a gRPC s
 
 ## The DATABASES
 - MySQL for storing usernames, password etc.
-- Neo4j for storing all the relationships between users. Like who is friends with whom etc. 
+- Neo4j for storing all the relationships between users. Like who is friends with whom etc.
+
+**Example of the neo4j database**
+![NEO 4j DB](images/Neo4j_DB.png)
 
 ## The APIs 
 

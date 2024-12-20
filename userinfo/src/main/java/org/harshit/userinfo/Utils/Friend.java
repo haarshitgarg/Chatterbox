@@ -35,3 +35,4 @@ public class Friend {
         return "Name: "+name+" Last chat at: "+lastChat;
     }
 }
+

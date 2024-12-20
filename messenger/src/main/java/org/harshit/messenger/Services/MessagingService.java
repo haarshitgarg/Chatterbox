@@ -2,13 +2,17 @@ package org.harshit.messenger.Services;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.harshit.messenger.Controllers.UserInfoController;
 import org.harshit.messenger.chat.ChatServiceGrpc.ChatServiceImplBase;
 import org.harshit.messenger.chat.Messages.ChatMessage;
 import org.harshit.messenger.chat.Messages.ChatMessageResponse;
+import org.harshit.messenger.utils.UserMessage;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -62,6 +66,10 @@ public class MessagingService extends ChatServiceImplBase{
         StreamObserver<ChatMessage> requestObserver = new StreamObserver<ChatMessage>() {
             @Override
             public void onNext(ChatMessage message) {
+                // Creating message to be stored in the database
+                UUID id = UUID.randomUUID();
+                UserMessage msg_to_store = new UserMessage(id.toString() ,message.getUser().replace("\"", ""), message.getFriend().replace("\"", ""), message.getMessage(), message.getTimestamp(), false);
+                //
                 logger.log(Level.INFO, "Sent a message, "+message.getMessage()+", from user: "+message.getUser()+" to user: "+message.getFriend()+" at time: "+message.getTimestamp());
                 String user = message.getUser();
                 printUserMap();
@@ -75,6 +83,9 @@ public class MessagingService extends ChatServiceImplBase{
                 String friend = message.getFriend().replace("\"", "");
                 if(!userMap.containsKey(friend)) {
                     logger.log(Level.INFO, friend+" is not online");
+                    CompletableFuture.runAsync(()->{
+                        UserInfoController.instance.storeMessage(msg_to_store);
+                    });
                     return;
                 }
                 if(isTerminationMessage(message)) {
@@ -85,6 +96,10 @@ public class MessagingService extends ChatServiceImplBase{
 
                 StreamObserver<ChatMessage> resFriend = userMap.get(friend);
                 resFriend.onNext(message);
+                CompletableFuture.runAsync(()->{
+                    msg_to_store.setBReceived(true);
+                    UserInfoController.instance.storeMessage(msg_to_store);
+                });
             }
 
             @Override
@@ -132,3 +147,4 @@ public class MessagingService extends ChatServiceImplBase{
     }
 
 };
+
