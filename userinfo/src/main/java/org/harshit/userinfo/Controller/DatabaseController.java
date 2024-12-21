@@ -1,5 +1,6 @@
 package org.harshit.userinfo.Controller;
 
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,12 +73,13 @@ public class DatabaseController {
         try {
             System.out.println("[NEO4J DB CONTROLLER] Adding message to the db");
             Session session = this.driver_.session();
-            String create_msg = String.format("CREATE (m:MESSAGE{id:\"%s\", msg: \"%s\", time:%d});\n", message.getId(), message.getMsg(), message.getTime());
             String msg_from_query = String.format("MATCH (u1:PERSON{username:\"%s\"})\n", message.getMsg_from());
             String msg_to_query = String.format("MATCH (u2:PERSON{username:\"%s\"})\n", message.getMsg_to());
-            String relationship_query = String.format("CREATE (u1)-[:SENDER]->(m)-[:RECEIVER{status:%b}]->(u2);", message.getBReceived());
-
-            session.run(create_msg);
+            String relationship_query = String.format("CREATE (u1)-[:SENDER]->(m:MESSAGE{id:\"%s\", msg: \"%s\", time:%d})-[:RECEIVER{status:%b}]->(u2);", 
+                    message.getId(), 
+                    message.getMsg(), 
+                    message.getTime(), 
+                    message.getBReceived());
 
             String query = msg_to_query + msg_from_query + relationship_query;
             session.run(query);
@@ -90,6 +92,44 @@ public class DatabaseController {
 
         }
 
+    }
+
+    public List<Messages> getMessages(String username, long last_sync) {
+        List<Messages> messages = new ArrayList<>();
+        try {
+            Session session = this.driver_.session();
+            String query = String.format("MATCH (p:PERSON)-->(m:MESSAGE)-[r:RECEIVER]->(p2:PERSON) WHERE p.username = \"%s\" AND m.time > %d RETURN m.id AS id, m.msg AS msg, m.time AS time, p2.username as username, r.status AS status", username, last_sync);
+
+            System.out.println("[NEO4J DB CONTROLLER] The query: "+query);
+            Result result = session.run(query);
+            while(result.hasNext()) {
+                Record rec = result.next();
+                messages.add(new Messages(
+                            rec.get("id").toString(), 
+                            username, rec.get("username").toString(), 
+                            rec.get("msg").toString(), 
+                            rec.get("time", 0L), 
+                            rec.get("status", false)
+                            ));
+            }
+            String query2 = String.format("MATCH (p:PERSON)-->(m:MESSAGE)-[r:RECEIVER]->(p2:PERSON) WHERE p2.username = \"%s\" AND m.time > %d RETURN m.id AS id, m.msg AS msg, m.time AS time, p.username as username, r.status AS status", username, last_sync);
+            Result result2 = session.run(query2);
+            while(result2.hasNext()) {
+                Record rec = result2.next();
+                messages.add(new Messages(
+                            rec.get("id").toString(), 
+                            rec.get("username").toString(), username,  
+                            rec.get("msg").toString(), 
+                            rec.get("time", 0L), 
+                            rec.get("status", false)
+                            ));
+            }
+            return messages;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 }
